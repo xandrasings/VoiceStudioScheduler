@@ -39,7 +39,6 @@ int main(int argc, const char* argv[]) {
 	string newName;
 	while (getline(rosterFile, newName)) {
 		roster.add(Student(newName));
-		cout << "newName is currently " << newName << endl;
 		numStudents++;
 	}
 
@@ -48,8 +47,9 @@ int main(int argc, const char* argv[]) {
 		//nobody.availability.
 	}
 	
+	//prompt user for availability of each individual student!
 	roster.checkAvailability(catalog);
-	roster.printAvailability();
+	//roster.printAvailability();
 	
 	//create vector that decides how to make 
 	vector<int> scheduleVec;
@@ -60,8 +60,8 @@ int main(int argc, const char* argv[]) {
 		scheduleVec.push_back(NOBODY);
 	}
 
+	// consider each possible schedule permutation
 	sort(scheduleVec.begin(), scheduleVec.end());
-
 	do {
 		Schedule localSchedule;
 		bool viable;
@@ -86,6 +86,7 @@ int main(int argc, const char* argv[]) {
 		}
 	} while (next_permutation(scheduleVec.begin(),scheduleVec.end()));
 
+	cout << "Here are all the possible schedules: " << endl;
 	allPossible.print();	
 	return 0;
 }

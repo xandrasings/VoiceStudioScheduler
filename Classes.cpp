@@ -57,9 +57,9 @@ Student::Student (string n) {
 
 void Student::checkAvailability (TimeList& myList) {
 	char available = 'n';
+	cout << "Is " << name << " available at the following times?" << endl;
 	cout << "(Type 'y' for yes or 'n' for no.)" << endl;
 	for (unsigned int i = 0; i < myList.timeList.size(); i++) {
-		cout << "Is " << name << " available at the following time?" << endl;
 		myList.timeList[i].print();
 		cin >> available;
 		if (available == 'y') {
