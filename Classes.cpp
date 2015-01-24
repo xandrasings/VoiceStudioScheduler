@@ -145,8 +145,14 @@ void ScheduleGroup::add (Schedule newSchedule) {
 }
 
 void ScheduleGroup::print () {
-	for (unsigned int i = 0; i < scheduleGroup.size(); i++) {
-		scheduleGroup[i].print();
-		cout << endl;
+	if (scheduleGroup.size() > 0) {
+		cout << "All viable schedules: " << endl;
+		for (unsigned int i = 0; i < scheduleGroup.size(); i++) {
+			scheduleGroup[i].print();
+			cout << endl;
+		}
+	}
+	else {
+		cout << "No viable schedules :[" << endl;
 	}
 }
