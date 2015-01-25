@@ -83,6 +83,7 @@ public:
 public:
 	void add (Schedule);
 	void print ();
+	void print (int);
 };
 
 #endif // _CLASSES_

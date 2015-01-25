@@ -136,6 +136,10 @@ void Assignment::print () {
 }
 
 /* Schedule */
+bool operator<(const Schedule& lhs, const Schedule& rhs) {
+	return (lhs.preferenceRank > rhs.preferenceRank);
+}
+
 void Schedule::add (Assignment newAssignment) {
 	schedule.push_back(newAssignment);
 }
@@ -155,6 +159,26 @@ void ScheduleGroup::print () {
 	if (scheduleGroup.size() > 0) {
 		cout << "All viable schedules: " << endl;
 		for (unsigned int i = 0; i < scheduleGroup.size(); i++) {
+			cout << "Ranking of " << scheduleGroup[i].preferenceRank << endl;
+			scheduleGroup[i].print();
+			cout << endl;
+		}
+	}
+	else {
+		cout << "No viable schedules :[" << endl;
+	}
+}
+
+void ScheduleGroup::print (int n) {
+	if (n == -1) {
+		n = scheduleGroup.size();
+	}
+	if (n > scheduleGroup.size()) {
+		n = scheduleGroup.size();
+	}
+	if (n > 0) {
+		cout << n << " viable schedules: " << endl;
+		for (unsigned int i = 0; i < n; i++) {
 			cout << "Ranking of " << scheduleGroup[i].preferenceRank << endl;
 			scheduleGroup[i].print();
 			cout << endl;

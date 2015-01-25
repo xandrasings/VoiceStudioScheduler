@@ -36,7 +36,7 @@ int main(int argc, const char* argv[]) {
 	string junk, weekDayCheck, timeCheck, hourLongCheck; //strings for holding raw tokens of input
 	string weekDay, name, availability;	//strings for holding modified tokens of input
 	int hour, minute, delimiter, preference; //ints for holding modified tokens of input
-	ifstream availabilityFile("StudentAvailability.csv"); // input file
+	ifstream availabilityFile("StudentAvailability1.csv"); // input file
 
 	// Create student "Nobody"
 	Student nobody("Nobody");
@@ -196,12 +196,22 @@ int main(int argc, const char* argv[]) {
 	} while (next_permutation(scheduleVec.begin(),scheduleVec.end()));
 	cout << endl;
 
+	sort(allPossible.scheduleGroup.begin(),allPossible.scheduleGroup.end());
+
+
 	/* Optional Output */
-	// All viable schedules
-	cout << "Would you like to see all viable schedules?" << endl;
+	// Display viable schedules
+	int numDisplay;
+	cout << "How many schedules would you like to see?" << endl;
+	cout << "Respond with a number or 'all'" << endl;
 	cin >> response;
-	if (response == "y") {
-		allPossible.print();	
+	if (response == "all") {
+		numDisplay = -1;
 	}
+	else {
+		numDisplay = atoi(response.c_str());
+	}
+	allPossible.print(numDisplay);
+
 	return 0;
 }
