@@ -29,14 +29,17 @@ int main(int argc, const char* argv[]) {
 	int numStudents = 0;
 	int numTimeSlots = 0;
 	int hourLongCount = 0;
-	int numPermutations, doCount; //ints for tracking progress
-	string weekDaysS, timesS, studentLineS; //strings for holding a line
-	stringstream weekDaysSS, timesSS, studentLineSS; //stringstreams for holding a line
-	string junk, weekDayCheck, timeCheck, hourLongCheck; //strings for holding raw tokens
-	string weekDay, name, availability;	//strings for holding modified token
-	int hour, minute, delimiter; //ints for holding modified token
-	ifstream availabilityFile("StudentAvailability.csv");
 
+	int numPermutations, doCount; //ints for tracking run-time progress
+	string weekDaysS, timesS, studentLineS; //strings for holding a line of file input
+	stringstream weekDaysSS, timesSS, studentLineSS; //stringstreams for holding a line of file input
+	string junk, weekDayCheck, timeCheck, hourLongCheck; //strings for holding raw tokens of input
+	string weekDay, name, availability;	//strings for holding modified tokens of input
+	int hour, minute, delimiter; //ints for holding modified tokens of input
+	ifstream availabilityFile("StudentAvailability.csv"); // input file
+
+	// Create student "Nobody"
+	Student nobody("Nobody");
 
 	/* Read in all info from file */
 	// Read in time slots
@@ -62,8 +65,7 @@ int main(int argc, const char* argv[]) {
 		numTimeSlots++;
 	}
 
-
-	// Read in students from file
+	// Read in students
 	int studRef = 0;
 	while (availabilityFile >> studentLineS) {
 		int timeRef = 0;
@@ -80,24 +82,35 @@ int main(int argc, const char* argv[]) {
 		}
 		numStudents++;		
 		while(getline(studentLineSS, availability, ',')) {
-	    	if (availability == "y") {
+	    	if (availability != "0") {
 		    	roster.studentList[studRef].availability.push_back(& catalog.timeList[timeRef]);
 		    }
+		    /*
 		    else if (availability != "n") {
 		    	cout << "Error: One of your entries is neither 'y' or 'n'." << endl;
 		    }
+		    */
 	    	timeRef++;
 		}	
 		studentLineSS.clear();
 		studRef++;
 	}
 
-	// Create student "Nobody"
-	Student nobody("Nobody");
+	/* Optional Output */
+	string response;
+	// Individual student availability
+	cout << "Would you like to look at students' responses?" << endl;
+	cout << "Type 'y' for yes." << endl;
+	cin >> response;
+	if (response == "y") {
+		roster.printAvailability();
+	}
 
-	// If you want to look at individual availability, uncomment this:
-	roster.printAvailability();
+	// Progress on do while loop
+	cout << "Would you like to see progress updates on the loop?" << endl;
+	cin >> response;
 
+	/* Terrifyling process of doom */
 	// Create vector for making all permutations.
 	vector<int> scheduleVec;
 	
@@ -116,11 +129,13 @@ int main(int argc, const char* argv[]) {
 	sort(scheduleVec.begin(), scheduleVec.end());
 	doCount = 1;
 	do {
-		cout << (doCount*100)/numPermutations << "% - doCount " << doCount << ": ";
-		for (unsigned int i = 0; i < scheduleVec.size(); i++) {
-			cout << scheduleVec[i] << ",";
+		if (response == "y") {
+			cout << (doCount*100)/numPermutations << "% - doCount " << doCount << ": ";
+			for (unsigned int i = 0; i < scheduleVec.size(); i++) {
+				cout << scheduleVec[i] << ",";
+			}
+			cout << endl;
 		}
-		cout << endl;
 
 		// Create a new empty schedule
 		Schedule localSchedule;
@@ -173,8 +188,14 @@ int main(int argc, const char* argv[]) {
 		doCount++;
 	// Do this for every permutation
 	} while (next_permutation(scheduleVec.begin(),scheduleVec.end()));
+	cout << endl;
 
-	// Give every viable result
-	allPossible.print();	
+	/* Optional Output */
+	// All viable schedules
+	cout << "Would you like to see all viable schedules?" << endl;
+	cin >> response;
+	if (response == "y") {
+		allPossible.print();	
+	}
 	return 0;
 }

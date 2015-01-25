@@ -56,13 +56,13 @@ Student::Student (string n) {
 }
 
 void Student::checkAvailability (TimeList& myList) {
-	char available = 'n';
+	int available = 0;
 	cout << "Is " << name << " available at the following times?" << endl;
-	cout << "(Type 'y' for yes or 'n' for no.)" << endl;
+	cout << "(Type '1' for yes or '0' for no.)" << endl;
 	for (unsigned int i = 0; i < myList.timeList.size(); i++) {
 		myList.timeList[i].print();
 		cin >> available;
-		if (available == 'y') {
+		if (available != 0) {
 			availability.push_back(& myList.timeList[i]);
 		}
 		//make a protective loop here
