@@ -35,7 +35,7 @@ int main(int argc, const char* argv[]) {
 	stringstream weekDaysSS, timesSS, studentLineSS; //stringstreams for holding a line of file input
 	string junk, weekDayCheck, timeCheck, hourLongCheck; //strings for holding raw tokens of input
 	string weekDay, name, availability;	//strings for holding modified tokens of input
-	int hour, minute, delimiter; //ints for holding modified tokens of input
+	int hour, minute, delimiter, preference; //ints for holding modified tokens of input
 	ifstream availabilityFile("StudentAvailability.csv"); // input file
 
 	// Create student "Nobody"
@@ -84,6 +84,8 @@ int main(int argc, const char* argv[]) {
 		while(getline(studentLineSS, availability, ',')) {
 	    	if (availability != "0") {
 		    	roster.studentList[studRef].availability.push_back(& catalog.timeList[timeRef]);
+		    	preference = atoi(availability.c_str());
+		    	roster.studentList[studRef].preference.push_back(preference);
 		    }
 		    /*
 		    else if (availability != "n") {
@@ -141,16 +143,17 @@ int main(int argc, const char* argv[]) {
 		Schedule localSchedule;
 		bool viable; // Viability of current schedule
 		int j=0; // Separate iterator for referencing funky times
+		int preferenceRank = 0;
 		for (unsigned int i = 0; i < scheduleVec.size(); i++) {
 			bool hourAssignment = false;
-			//int j=0;
-			// Create each assignment for schedule
 
+			// Create each assignment for schedule
 			Assignment localAssignment1;
 			Assignment localAssignment2;
 			if (scheduleVec[i] == NOBODY) {
 				localAssignment1.setArgs(catalog.timeList[j], nobody);
 				localAssignment1.availability = true;
+				localAssignment1.preferenceRank = 0;
 			}
 			else {
 				localAssignment1.setArgs(catalog.timeList[j], roster.studentList[scheduleVec[i]]);
@@ -175,12 +178,15 @@ int main(int argc, const char* argv[]) {
 			}
 			// If viable, add Assignment to schedule, move on to next assignment
 			localSchedule.add (localAssignment1);
+			preferenceRank += localAssignment1.preferenceRank;
 			
 			if (hourAssignment) {
 				localSchedule.add(localAssignment2);
+				preferenceRank += localAssignment2.preferenceRank;
 			}
 			j++;
 		}
+		localSchedule.preferenceRank = preferenceRank;
 		// If all assignments were viable, add schedule
 		if (viable) {
 			allPossible.add(localSchedule);

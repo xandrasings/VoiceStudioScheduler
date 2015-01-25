@@ -72,6 +72,7 @@ void Student::checkAvailability (TimeList& myList) {
 
 void Student::printAvailability () {
 	for (unsigned int i = 0; i < availability.size(); i++) {
+		//cout << preference[i] << " ";
 		availability[i]->print();
 	}
 }
@@ -119,6 +120,7 @@ void Assignment::checkAvailability () {
 	bool availCheck = false;
 	for (unsigned int i = 0; i < student->availability.size(); i++) {
 		if (*time == *(student->availability[i])) {
+			preferenceRank = student->preference[i];
 			availCheck = true;
 			break;
 		}
@@ -127,6 +129,7 @@ void Assignment::checkAvailability () {
 }
 
 void Assignment::print () {
+	//cout << preferenceRank << " ";
 	cout << student->name << " on ";
 	time->print();
 	//cout << "Available: " << availability << endl;
@@ -152,6 +155,7 @@ void ScheduleGroup::print () {
 	if (scheduleGroup.size() > 0) {
 		cout << "All viable schedules: " << endl;
 		for (unsigned int i = 0; i < scheduleGroup.size(); i++) {
+			cout << "Ranking of " << scheduleGroup[i].preferenceRank << endl;
 			scheduleGroup[i].print();
 			cout << endl;
 		}

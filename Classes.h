@@ -33,6 +33,7 @@ class Student {
 public:
 	string name;
 	vector<Time*> availability;
+	vector<int> preference;
 	bool hourLong;
 public:
 	Student (string);
@@ -55,6 +56,7 @@ class Assignment {
 public:
 	Time* time;
 	Student* student;
+	int preferenceRank;
 	bool availability;
 public:
 	Assignment ();
@@ -68,6 +70,7 @@ public:
 class Schedule {
 public:
 	vector<Assignment> schedule;
+	int preferenceRank;
 public:
 	void add (Assignment);
 	void print ();
