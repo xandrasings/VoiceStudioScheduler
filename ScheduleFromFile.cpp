@@ -28,6 +28,7 @@ int main(int argc, const char* argv[]) {
 	ScheduleGroup allPossible;
 	int numStudents = 0;
 	int numTimeSlots = 0;
+	int hourLongCount = 0;
 	int numPermutations, doCount; //ints for tracking progress
 	string weekDaysS, timesS, studentLineS; //strings for holding a line
 	stringstream weekDaysSS, timesSS, studentLineSS; //stringstreams for holding a line
@@ -72,6 +73,7 @@ int main(int argc, const char* argv[]) {
 		roster.add(Student(name));
 		if (hourLongCheck == "*") {
 			roster.studentList[studRef].hourLong = true;
+			hourLongCount++;
 		}
 		else {
 			roster.studentList[studRef].hourLong = false;
@@ -92,10 +94,10 @@ int main(int argc, const char* argv[]) {
 
 	// Create student "Nobody"
 	Student nobody("Nobody");
-	
+
 	// If you want to look at individual availability, uncomment this:
-	//roster.printAvailability();
-	
+	roster.printAvailability();
+
 	// Create vector for making all permutations.
 	vector<int> scheduleVec;
 	
@@ -105,12 +107,12 @@ int main(int argc, const char* argv[]) {
 	}
 	
 	// Reference for each empty time
-	for (int i = 0; i < (numTimeSlots - numStudents); i++) {
+	for (int i = 0; i < (numTimeSlots - numStudents - hourLongCount); i++) {
 		scheduleVec.push_back(NOBODY);
 	}
 
 	// Consider each possible schedule permutation
-	numPermutations = factorial(numTimeSlots, numTimeSlots-numStudents);
+	numPermutations = factorial(numTimeSlots-hourLongCount, numTimeSlots-numStudents-hourLongCount);
 	sort(scheduleVec.begin(), scheduleVec.end());
 	doCount = 1;
 	do {
@@ -119,28 +121,50 @@ int main(int argc, const char* argv[]) {
 			cout << scheduleVec[i] << ",";
 		}
 		cout << endl;
+
 		// Create a new empty schedule
 		Schedule localSchedule;
-		bool viable;
+		bool viable; // Viability of current schedule
+		int j=0; // Separate iterator for referencing funky times
 		for (unsigned int i = 0; i < scheduleVec.size(); i++) {
-			// Create each assignment for schedule		
-			Assignment localAssignment;
+			bool hourAssignment = false;
+			//int j=0;
+			// Create each assignment for schedule
+
+			Assignment localAssignment1;
+			Assignment localAssignment2;
 			if (scheduleVec[i] == NOBODY) {
-				localAssignment.setArgs(catalog.timeList[i], nobody);
-				localAssignment.availability = true;
+				localAssignment1.setArgs(catalog.timeList[j], nobody);
+				localAssignment1.availability = true;
 			}
 			else {
-				localAssignment.setArgs(catalog.timeList[i], roster.studentList[scheduleVec[i]]);
-				localAssignment.checkAvailability();
+				localAssignment1.setArgs(catalog.timeList[j], roster.studentList[scheduleVec[i]]);
+				localAssignment1.checkAvailability();
+				if (roster.studentList[scheduleVec[i]].hourLong) {
+					j++;
+					hourAssignment = true;
+					localAssignment2.setArgs(catalog.timeList[j], roster.studentList[scheduleVec[i]]);
+					localAssignment2.checkAvailability();
+				}
 			}
 			// Check if assignment is viable
-			viable = localAssignment.availability;
+			if (hourAssignment) {
+				viable = (localAssignment1.availability && localAssignment2.availability);
+			}
+			else {
+				viable = localAssignment1.availability;
+			}
 			// If not, move on to next schedule
 			if (!viable) {
 				break;
 			}
 			// If viable, add Assignment to schedule, move on to next assignment
-			localSchedule.add (localAssignment);
+			localSchedule.add (localAssignment1);
+			
+			if (hourAssignment) {
+				localSchedule.add(localAssignment2);
+			}
+			j++;
 		}
 		// If all assignments were viable, add schedule
 		if (viable) {
