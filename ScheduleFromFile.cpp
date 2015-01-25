@@ -36,7 +36,7 @@ int main(int argc, const char* argv[]) {
 	string junk, weekDayCheck, timeCheck, hourLongCheck; //strings for holding raw tokens of input
 	string weekDay, name, availability;	//strings for holding modified tokens of input
 	int hour, minute, delimiter, preference; //ints for holding modified tokens of input
-	ifstream availabilityFile("StudentAvailability1.csv"); // input file
+	ifstream availabilityFile("StudentAvailability9.csv"); // input file
 
 	// Create student "Nobody"
 	Student nobody("Nobody");
@@ -168,6 +168,9 @@ int main(int argc, const char* argv[]) {
 			// Check if assignment is viable
 			if (hourAssignment) {
 				viable = (localAssignment1.availability && localAssignment2.availability);
+				if (viable) {
+					viable = checkHourSequence(localAssignment1, localAssignment2);
+				}
 			}
 			else {
 				viable = localAssignment1.availability;
@@ -181,14 +184,15 @@ int main(int argc, const char* argv[]) {
 			
 			if (hourAssignment) {
 				localSchedule.add(localAssignment2);
-				preferenceRank += (localAssignment2.preferenceRank / 2);
-				preferenceRank += (localAssignment2.preferenceRank / 2);
+				preferenceRank += (localAssignment1.preferenceRank / (float)2);
+				preferenceRank += (localAssignment2.preferenceRank / (float)2);
 			}
 			else {
 				preferenceRank += localAssignment1.preferenceRank;
 			}
 			j++;
 		}
+		preferenceRank = preferenceRank / (float) numStudents;
 		localSchedule.preferenceRank = preferenceRank;
 		// If all assignments were viable, add schedule
 		if (viable) {
@@ -205,11 +209,15 @@ int main(int argc, const char* argv[]) {
 	/* Optional Output */
 	// Display viable schedules
 	int numDisplay;
+	cout << "Found " << allPossible.scheduleGroup.size() << " viable schedules." << endl;
 	cout << "How many schedules would you like to see?" << endl;
-	cout << "Respond with a number or 'all'" << endl;
+	cout << "Respond with a specific number, 'all' for all results, or 'top' for all results with highest rank." << endl;
 	cin >> response;
 	if (response == "all") {
 		numDisplay = -1;
+	}
+	else if (response == "top") {
+		numDisplay = -2;
 	}
 	else {
 		numDisplay = atoi(response.c_str());

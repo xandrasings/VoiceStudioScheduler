@@ -91,11 +91,11 @@ void StudentList::checkAvailability (TimeList& myList) {
 
 void StudentList::printAvailability () {
 	for (unsigned int i = 0; i < studentList.size(); i++) {
-		cout << "Student " << studentList[i].name << " is ";
+		cout << "Student " << studentList[i].name << " needs ";
 		if (!studentList[i].hourLong) {
-			cout << "not ";
+			cout << "half  ";
 		}
-		cout << "hourly, and is available at the following times: " << endl;
+		cout << "hour long lessons, and is available at the following times: " << endl;
 		studentList[i].printAvailability();
 		cout << endl;
 	}
@@ -145,9 +145,11 @@ void Schedule::add (Assignment newAssignment) {
 }
 
 void Schedule::print () {
+	cout << "Average assignment rating: " << preferenceRank << endl << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
 	for (unsigned int i = 0; i < schedule.size(); i++) {
 		schedule[i].print();
 	}
+	cout << endl;
 }
 
 /* ScheduleGroup */
@@ -155,36 +157,59 @@ void ScheduleGroup::add (Schedule newSchedule) {
 	scheduleGroup.push_back(newSchedule);
 }
 
-void ScheduleGroup::print () {
-	if (scheduleGroup.size() > 0) {
-		cout << "All viable schedules: " << endl;
-		for (unsigned int i = 0; i < scheduleGroup.size(); i++) {
-			cout << "Ranking of " << scheduleGroup[i].preferenceRank << endl;
+void ScheduleGroup::print (int n) {
+	unsigned int i = 0;
+	if (n == -2) {
+		float preferenceRank = scheduleGroup[0].preferenceRank;
+		cout << "Top schedules: " << endl;
+		cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << endl;
+		while (scheduleGroup[i].preferenceRank == preferenceRank) {
+			cout << "Schedule #" << i << endl;
 			scheduleGroup[i].print();
-			cout << endl;
+			i++;
 		}
+		cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << endl;
+		cout << "printed " << i << " top schedules." << endl;
 	}
 	else {
-		cout << "No viable schedules :[" << endl;
+		if (n == -1) {
+			n = scheduleGroup.size();
+		}
+		if (n > scheduleGroup.size()) {
+			n = scheduleGroup.size();
+		}
+		if (n > 0) {
+			cout << n << " viable schedules: " << endl;
+			cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << endl;
+			for (i = 0; i < n; i++) {
+				cout << "Schedule #" << i << endl;
+				scheduleGroup[i].print();
+			}
+			cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << endl;
+			cout << "printed top " << i << " schedules." << endl;
+		}
+		else {
+			cout << "No viable schedules :[" << endl;
+		}
 	}
 }
 
-void ScheduleGroup::print (int n) {
-	if (n == -1) {
-		n = scheduleGroup.size();
-	}
-	if (n > scheduleGroup.size()) {
-		n = scheduleGroup.size();
-	}
-	if (n > 0) {
-		cout << n << " viable schedules: " << endl;
-		for (unsigned int i = 0; i < n; i++) {
-			cout << "Ranking of " << scheduleGroup[i].preferenceRank << endl;
-			scheduleGroup[i].print();
-			cout << endl;
+bool checkHourSequence (Assignment& firstAssignment, Assignment& secondAssignment) {
+	bool dayCheck, timeCheck;
+	dayCheck = (firstAssignment.time->weekDay == secondAssignment.time->weekDay);
+	if (
+		firstAssignment.time->hour == secondAssignment.time->hour ||
+		(firstAssignment.time->hour + 1)%12 == (secondAssignment.time->hour)%12)
+		{
+			if ((firstAssignment.time->minute + 30)%60 == (secondAssignment.time->minute)%60) {
+				timeCheck = true;
+			}
+			else {
+				timeCheck = false;
+			}
 		}
-	}
 	else {
-		cout << "No viable schedules :[" << endl;
+		 timeCheck = false;
 	}
+	return (dayCheck && timeCheck);
 }
