@@ -143,7 +143,7 @@ int main(int argc, const char* argv[]) {
 		Schedule localSchedule;
 		bool viable; // Viability of current schedule
 		int j=0; // Separate iterator for referencing funky times
-		int preferenceRank = 0;
+		float preferenceRank = 0;
 		for (unsigned int i = 0; i < scheduleVec.size(); i++) {
 			bool hourAssignment = false;
 
@@ -178,11 +178,14 @@ int main(int argc, const char* argv[]) {
 			}
 			// If viable, add Assignment to schedule, move on to next assignment
 			localSchedule.add (localAssignment1);
-			preferenceRank += localAssignment1.preferenceRank;
 			
 			if (hourAssignment) {
 				localSchedule.add(localAssignment2);
-				preferenceRank += localAssignment2.preferenceRank;
+				preferenceRank += (localAssignment2.preferenceRank / 2);
+				preferenceRank += (localAssignment2.preferenceRank / 2);
+			}
+			else {
+				preferenceRank += localAssignment1.preferenceRank;
 			}
 			j++;
 		}
