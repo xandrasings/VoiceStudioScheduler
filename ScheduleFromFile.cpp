@@ -14,18 +14,29 @@ using namespace std;
 
 #define NOBODY -1
 
+int factorial(int times, int empty) {
+	int result;
+    if (times == empty)
+        return 1;
+    else
+        return times * factorial(times-1, empty);
+}
+
 int main(int argc, const char* argv[]) {
 	TimeList catalog;
 	StudentList roster;
 	ScheduleGroup allPossible;
 	int numStudents = 0;
 	int numTimeSlots = 0;
+	int numPermutations, doCount; //ints for tracking progress
 	string weekDaysS, timesS, studentLineS; //strings for holding a line
 	stringstream weekDaysSS, timesSS, studentLineSS; //stringstreams for holding a line
 	string junk, weekDayCheck, timeCheck; //strings for holding raw tokens
 	string weekDay, name, availability;	//strings for holding modified token
 	int hour, minute, delimiter; //ints for holding modified token
 	ifstream availabilityFile("StudentAvailability.csv");
+
+
 
 	/* Read in all info from file */
 	// Read in time slots
@@ -69,7 +80,7 @@ int main(int argc, const char* argv[]) {
 		}	
 		studentLineSS.clear();
 		studRef++;
-	}	
+	}
 
 	// Create student "Nobody"
 	Student nobody("Nobody");
@@ -91,8 +102,15 @@ int main(int argc, const char* argv[]) {
 	}
 
 	// Consider each possible schedule permutation
+	numPermutations = factorial(numTimeSlots, numTimeSlots-numStudents);
 	sort(scheduleVec.begin(), scheduleVec.end());
+	doCount = 1;
 	do {
+		cout << (doCount*100)/numPermutations << "% - doCount " << doCount << ": ";
+		for (unsigned int i = 0; i < scheduleVec.size(); i++) {
+			cout << scheduleVec[i] << ",";
+		}
+		cout << endl;
 		// Create a new empty schedule
 		Schedule localSchedule;
 		bool viable;
@@ -120,6 +138,7 @@ int main(int argc, const char* argv[]) {
 		if (viable) {
 			allPossible.add(localSchedule);
 		}
+		doCount++;
 	// Do this for every permutation
 	} while (next_permutation(scheduleVec.begin(),scheduleVec.end()));
 
