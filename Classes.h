@@ -33,6 +33,7 @@ class Student {
 public:
 	string name;
 	vector<Time*> availability;
+	bool hourLong;
 public:
 	Student (string);
 	void checkAvailability (TimeList&);

@@ -31,11 +31,10 @@ int main(int argc, const char* argv[]) {
 	int numPermutations, doCount; //ints for tracking progress
 	string weekDaysS, timesS, studentLineS; //strings for holding a line
 	stringstream weekDaysSS, timesSS, studentLineSS; //stringstreams for holding a line
-	string junk, weekDayCheck, timeCheck; //strings for holding raw tokens
+	string junk, weekDayCheck, timeCheck, hourLongCheck; //strings for holding raw tokens
 	string weekDay, name, availability;	//strings for holding modified token
 	int hour, minute, delimiter; //ints for holding modified token
 	ifstream availabilityFile("StudentAvailability.csv");
-
 
 
 	/* Read in all info from file */
@@ -43,9 +42,11 @@ int main(int argc, const char* argv[]) {
 	availabilityFile >> weekDaysS;
 	weekDaysSS << weekDaysS << ",";
 	getline(weekDaysSS, junk, ',');
+	getline(weekDaysSS, junk, ',');
 
 	availabilityFile >> timesS;
 	timesSS << timesS << ",";
+	getline(timesSS, junk, ',');
 	getline(timesSS, junk, ',');
 
 	while(getline(weekDaysSS, weekDayCheck, ',')) {
@@ -66,8 +67,15 @@ int main(int argc, const char* argv[]) {
 	while (availabilityFile >> studentLineS) {
 		int timeRef = 0;
 		studentLineSS << studentLineS << ",";
+		getline(studentLineSS, hourLongCheck, ',');
 		getline(studentLineSS, name, ',');
 		roster.add(Student(name));
+		if (hourLongCheck == "*") {
+			roster.studentList[studRef].hourLong = true;
+		}
+		else {
+			roster.studentList[studRef].hourLong = false;
+		}
 		numStudents++;		
 		while(getline(studentLineSS, availability, ',')) {
 	    	if (availability == "y") {
@@ -86,7 +94,7 @@ int main(int argc, const char* argv[]) {
 	Student nobody("Nobody");
 	
 	// If you want to look at individual availability, uncomment this:
-	// roster.printAvailability();
+	//roster.printAvailability();
 	
 	// Create vector for making all permutations.
 	vector<int> scheduleVec;

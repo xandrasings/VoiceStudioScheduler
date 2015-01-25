@@ -90,7 +90,11 @@ void StudentList::checkAvailability (TimeList& myList) {
 
 void StudentList::printAvailability () {
 	for (unsigned int i = 0; i < studentList.size(); i++) {
-		cout << "Student " << studentList[i].name << " is available at the following times: " << endl;
+		cout << "Student " << studentList[i].name << " is ";
+		if (!studentList[i].hourLong) {
+			cout << "not ";
+		}
+		cout << "hourly, and is available at the following times: " << endl;
 		studentList[i].printAvailability();
 		cout << endl;
 	}

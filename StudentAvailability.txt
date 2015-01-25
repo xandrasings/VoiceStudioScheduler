@@ -1,1 +1,0 @@
-,Monday,,,,,Tuesday,,,,9:00,9:30,10:00,10:30,11:00,1:00,1:30,3:00,3:30Bill,y,y,y,y,n,n,n,y,yCharlie,y,y,n,n,n,n,n,n,nPercy,n,n,n,n,n,y,y,y,yFred,n,n,n,y,y,n,n,y,nGeorge,n,n,n,y,y,n,n,n,yRon,y,y,n,n,n,n,n,n,yGinny,y,n,n,n,y,n,n,n,y
