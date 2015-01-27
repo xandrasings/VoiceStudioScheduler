@@ -29,16 +29,21 @@ int main(int argc, const char* argv[]) {
 	int numStudents = 0;
 	int numTimeSlots = 0;
 	int hourLongCount = 0;
-
-	int numPermutations, doCount; //ints for tracking run-time progress
+	int threadct = 1;
+	unsigned long long numPermutations, doCount; //ints for tracking run-time progress
 	string weekDaysS, timesS, studentLineS; //strings for holding a line of file input
 	stringstream weekDaysSS, timesSS, studentLineSS; //stringstreams for holding a line of file input
 	string junk, weekDayCheck, timeCheck, hourLongCheck; //strings for holding raw tokens of input
 	string weekDay, name, availability;	//strings for holding modified tokens of input
 	int hour, minute, delimiter, preference; //ints for holding modified tokens of input
-	ifstream availabilityFile("StudentAvailability9.csv"); // input file
+	ifstream availabilityFile("StudentAvailability5.csv"); // input file
 
-	// Create student "Nobody"
+	/* Parse command-line args */
+	if (argc > 1) {
+		threadct = atoi(argv[1]);
+	}
+
+	/* Create student "Nobody" */
 	Student nobody("Nobody");
 
 	/* Read in all info from file */
@@ -87,32 +92,13 @@ int main(int argc, const char* argv[]) {
 		    	preference = atoi(availability.c_str());
 		    	roster.studentList[studRef].preference.push_back(preference);
 		    }
-		    /*
-		    else if (availability != "n") {
-		    	cout << "Error: One of your entries is neither 'y' or 'n'." << endl;
-		    }
-		    */
 	    	timeRef++;
 		}	
 		studentLineSS.clear();
 		studRef++;
 	}
 
-	/* Optional Output */
-	string response;
-	// Individual student availability
-	cout << "Would you like to look at students' responses?" << endl;
-	cout << "Type 'y' for yes." << endl;
-	cin >> response;
-	if (response == "y") {
-		roster.printAvailability();
-	}
-
-	// Progress on do while loop
-	cout << "Would you like to see progress updates on the loop?" << endl;
-	cin >> response;
-
-	/* Terrifyling process of doom */
+	/* Terrifying process of doom */
 	// Create vector for making all permutations.
 	vector<int> scheduleVec;
 	
@@ -126,38 +112,48 @@ int main(int argc, const char* argv[]) {
 		scheduleVec.push_back(NOBODY);
 	}
 
-	// Consider each possible schedule permutation
+	// Variables to be moved
+	bool viable;
+	float preferenceRank;
+	int j;
+	unsigned int i;
+	bool hourAssignment;
+	Schedule localSchedule;
+	Assignment localAssignment1;
+	Assignment localAssignment2;
+	unsigned long long k;
 	numPermutations = factorial(numTimeSlots-hourLongCount, numTimeSlots-numStudents-hourLongCount);
+	
+
 	sort(scheduleVec.begin(), scheduleVec.end());
-	doCount = 1;
-	do {
-		if (response == "y") {
-			cout << (doCount*100)/numPermutations << "% - doCount " << doCount << ": ";
-			for (unsigned int i = 0; i < scheduleVec.size(); i++) {
-				cout << scheduleVec[i] << ",";
-			}
-			cout << endl;
-		}
+	for (k = 0; k < numPermutations; k++) {
+		// Empty local schedule for new loop
+		localSchedule.clear();
 
-		// Create a new empty schedule
-		Schedule localSchedule;
-		bool viable; // Viability of current schedule
-		int j=0; // Separate iterator for referencing funky times
-		float preferenceRank = 0;
-		for (unsigned int i = 0; i < scheduleVec.size(); i++) {
-			bool hourAssignment = false;
+		// Reset local preference rank and iterator
+		preferenceRank = 0;
+		j = 0;
 
-			// Create each assignment for schedule
-			Assignment localAssignment1;
-			Assignment localAssignment2;
+		// Loop through assignments represented by permutation
+		for (i = 0; i < scheduleVec.size(); i++) {
+			//bool hourAssignment = false;
+			hourAssignment = false;
+
+			// Empty local assignments for new loop
+			localAssignment1.clear();
+			localAssignment2.clear();
+
+			// If assigned to nobody, special args
 			if (scheduleVec[i] == NOBODY) {
 				localAssignment1.setArgs(catalog.timeList[j], nobody);
 				localAssignment1.availability = true;
 				localAssignment1.preferenceRank = 0;
 			}
+			// If assigned to somebody, set args to appropriate locations
 			else {
 				localAssignment1.setArgs(catalog.timeList[j], roster.studentList[scheduleVec[i]]);
 				localAssignment1.checkAvailability();
+				// Extra ssignment for hour long
 				if (roster.studentList[scheduleVec[i]].hourLong) {
 					j++;
 					hourAssignment = true;
@@ -165,7 +161,7 @@ int main(int argc, const char* argv[]) {
 					localAssignment2.checkAvailability();
 				}
 			}
-			// Check if assignment is viable
+			// Check if assignment(s) is/are viable
 			if (hourAssignment) {
 				viable = (localAssignment1.availability && localAssignment2.availability);
 				if (viable) {
@@ -175,54 +171,39 @@ int main(int argc, const char* argv[]) {
 			else {
 				viable = localAssignment1.availability;
 			}
-			// If not, move on to next schedule
+			// If not viable, move on to next schedule
 			if (!viable) {
 				break;
 			}
 			// If viable, add Assignment to schedule, move on to next assignment
 			localSchedule.add (localAssignment1);
-			
+
+			// If hour long, add second assignmet and adjust preference.			
 			if (hourAssignment) {
 				localSchedule.add(localAssignment2);
 				preferenceRank += (localAssignment1.preferenceRank / (float)2);
 				preferenceRank += (localAssignment2.preferenceRank / (float)2);
 			}
+			// If not, add preference normally
 			else {
 				preferenceRank += localAssignment1.preferenceRank;
 			}
 			j++;
 		}
-		preferenceRank = preferenceRank / (float) numStudents;
-		localSchedule.preferenceRank = preferenceRank;
-		// If all assignments were viable, add schedule
+
+		// If all assignments were viable, calculate rank and add schedule 
 		if (viable) {
+			preferenceRank = preferenceRank / (float) numStudents;
+			localSchedule.preferenceRank = preferenceRank;
 			allPossible.add(localSchedule);
 		}
-		doCount++;
-	// Do this for every permutation
-	} while (next_permutation(scheduleVec.begin(),scheduleVec.end()));
+		next_permutation(scheduleVec.begin(),scheduleVec.end());
+	}
 	cout << endl;
 
 	sort(allPossible.scheduleGroup.begin(),allPossible.scheduleGroup.end());
 
-
-	/* Optional Output */
 	// Display viable schedules
-	int numDisplay;
-	cout << "Found " << allPossible.scheduleGroup.size() << " viable schedules." << endl;
-	cout << "How many schedules would you like to see?" << endl;
-	cout << "Respond with a specific number, 'all' for all results, or 'top' for all results with highest rank." << endl;
-	cin >> response;
-	if (response == "all") {
-		numDisplay = -1;
-	}
-	else if (response == "top") {
-		numDisplay = -2;
-	}
-	else {
-		numDisplay = atoi(response.c_str());
-	}
-	allPossible.print(numDisplay);
-
+	allPossible.print(-2);
 	return 0;
 }

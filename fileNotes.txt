@@ -1,0 +1,5 @@
+SchedulerAvailability5.csv
+	38736 valid schedules
+	48 top schedules
+	runs sequentially in about .5 seconds
+

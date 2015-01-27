@@ -64,6 +64,7 @@ public:
 	void setArgs (Time&, Student&);
 	void checkAvailability ();
 	void print ();
+	void clear ();
 };
 
 /* Schedule */
@@ -74,6 +75,7 @@ public:
 public:
 	void add (Assignment);
 	void print ();
+	void clear();
 };
 
 /* ScheduleGroup */

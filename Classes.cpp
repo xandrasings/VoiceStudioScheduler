@@ -135,6 +135,11 @@ void Assignment::print () {
 	//cout << "Available: " << availability << endl;
 }
 
+void Assignment::clear () {
+	preferenceRank = 0;
+	availability = 0;
+}
+
 /* Schedule */
 bool operator<(const Schedule& lhs, const Schedule& rhs) {
 	return (lhs.preferenceRank > rhs.preferenceRank);
@@ -152,6 +157,11 @@ void Schedule::print () {
 	cout << endl;
 }
 
+void Schedule::clear () {
+	schedule.clear();
+	preferenceRank = 0;
+}
+
 /* ScheduleGroup */
 void ScheduleGroup::add (Schedule newSchedule) {
 	scheduleGroup.push_back(newSchedule);
@@ -164,7 +174,7 @@ void ScheduleGroup::print (int n) {
 		cout << "Top schedules: " << endl;
 		cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << endl;
 		while (scheduleGroup[i].preferenceRank == preferenceRank) {
-			cout << "Schedule #" << i << endl;
+			cout << "Schedule #" << i+1 << endl;
 			scheduleGroup[i].print();
 			i++;
 		}
