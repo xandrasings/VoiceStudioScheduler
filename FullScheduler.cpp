@@ -8,8 +8,8 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-#include "classes.h"
-#include "classes.cpp"
+#include "Classes.h"
+#include "Classes.cpp"
 using namespace std;
 
 #define NOBODY -1
@@ -26,7 +26,7 @@ int main(int argc, const char* argv[]) {
 	/* Initializing Variables */
 	// Arguments
 	int threadct = 1; // Number of threads (default = 1)
-	ifstream availabilityFile("StudentAvailability8.csv"); // input file
+	string fileName = "StudentAvailability.csv";
 
 	// Initialize important custom objects
 	TimeList catalog; // Holds available lesson times
@@ -65,12 +65,19 @@ int main(int argc, const char* argv[]) {
 	Assignment localAssignment1;
 	Assignment localAssignment2;
 	bool hourAssignment;
-
-
+	
 	/* Parse command-line args */
-	if (argc > 1) {
-		threadct = atoi(argv[1]);
+	if (argc == 1) {
+		//cout << "NO ARGUMENTS " << endl;
+		//return 0;
 	}
+	else {
+		fileName = argv[1];
+	}
+	if (argc == 3) {
+		threadct = atoi(argv[2]);		
+	}
+	ifstream availabilityFile(fileName);
 
 
 	/* Read in all info from file */
@@ -243,6 +250,7 @@ int main(int argc, const char* argv[]) {
 			/*
 			cout << "[ ";
 			for (h = 0; h < scheduleVecSize; h++) {
+				cout << ((float)h)/((float)scheduleVecSize)*100 << "% - ";
 				cout << localScheduleVec[h];
 				if (h != scheduleVecSize-1) {
 					cout << ", ";
@@ -327,37 +335,10 @@ int main(int argc, const char* argv[]) {
 		}
 	}
 	cout << endl;
-	cout << "valid schedules: " << allPossible.scheduleGroup.size() << endl;
-	//sort(allPossible.scheduleGroup.begin(),allPossible.scheduleGroup.end());
 
-	// Create a scheduleGroupVec for each thread
-	vector<ScheduleGroup> scheduleGroupVec;
-	for (j = 0; j < threadct; j++) {
-		ScheduleGroup localScheduleGroup;
-		scheduleGroupVec.push_back(localScheduleGroup);
-		cout << "Added localScheduleGroup " << j << endl;
-	}
-cin >> junk;
-	//
-	#pragma omp parallel for num_threads(threadct) \
-		private(h)
-	for (h = 0; h < allPossible.scheduleGroup.size(); h++) {
-		cout << "adding schedule " << h << " to scheduleGroup " << h%threadct << endl;
-		scheduleGroupVec[h%threadct].scheduleGroup.push_back(allPossible.scheduleGroup[h]);
-	}
+	sort(allPossible.scheduleGroup.begin(),allPossible.scheduleGroup.end());
 
-/*
-	#pragma omp parallel for num_threads(threadct) \
-		private(j)
-	for (j = 0; j < threadct; j++) {
-		sort(scheduleGroupVec[j].scheduleGroup.begin(),scheduleGroupVec[j].scheduleGroup.end());
-	}
-
-	for (j = 0; j < threadct; j++) {
-		scheduleGroupVec[j].print(-2);
-	}
-*/
 	// Display viable schedules
-	//allPossible.print(-2);
+	allPossible.print(-3);
 	return 0;
 }

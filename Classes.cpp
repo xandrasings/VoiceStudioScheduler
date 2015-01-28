@@ -2,10 +2,71 @@
 // 1/23/15
 // Classes of Scheduler Application
 
+#ifndef _CLASSESCONTENT_
+#define _CLASSESCONTENT_
 #include <iostream>
 #include <vector>
 #include "classes.h"
 using namespace std;
+
+/* Weekday */
+bool operator<(const Weekday& lhs, const Weekday& rhs) {
+	return (lhs.avPreference > rhs.avPreference);
+}
+
+Weekday::Weekday (string d) {
+	day = d;
+	count = 1;
+	preferenceTotal = preferenceCount = 0;
+	avPreference = 0;
+	assigned = false;
+}
+
+void Weekday::print () {
+	cout << "Day: " << day << endl;
+	cout << "Count: " << count << endl;
+	cout << "Pref Total: " << preferenceTotal << endl;
+	cout << "Pref Count: " << preferenceCount << endl;
+	cout << "Pref Av: " << avPreference << endl;
+	cout << endl;
+}
+
+void Weekday::calcPref () {
+	avPreference = ((float)preferenceTotal)/((float)preferenceCount);
+}
+
+/* Week */
+void Week::add (Weekday w) {
+	fullWeek.push_back(w);
+}
+
+void Week::calcPref () {
+	for (unsigned int i = 0; i < fullWeek.size(); i++) {
+		fullWeek[i].calcPref();
+	}
+}
+
+void Week::sortWeek () {
+	sort(fullWeek.begin(), fullWeek.end());
+}
+
+void Week::print () {
+	for (unsigned int i = 0; i < fullWeek.size(); i++) {
+		fullWeek[i].print();
+	}
+}
+
+int Week::nextDay () {
+	float min = 10;
+	int ref = -1;
+	for (unsigned int i = 0; i < fullWeek.size(); i++) {
+		if (fullWeek[i].avPreference < min && (!fullWeek[i].assigned)) {
+			min = fullWeek[i].avPreference;
+			ref = i;
+		}
+	}
+	return ref;
+}
 
 /* Time */
 Time::Time () {
@@ -51,8 +112,23 @@ void TimeList::print() {
 }
 
 /* Student */
+bool operator<(const Student& lhs, const Student& rhs) {
+	return (lhs.sortablePreference > rhs.sortablePreference);
+}
+
+
 Student::Student (string n) {
 	name = n;
+	assigned = false;
+}
+
+
+Student::Student (string n, int nd) {
+	name = n;
+	for (int i = 0; i < nd; i++) {
+		preferenceByDay.push_back(0);
+	}
+	assigned = false;
 }
 
 void Student::checkAvailability (TimeList& myList) {
@@ -70,11 +146,29 @@ void Student::checkAvailability (TimeList& myList) {
 	}
 }
 
+void Student::print () {
+	cout << name;
+}
+
 void Student::printAvailability () {
+	if (assigned) {
+		cout << "ASSIGNED!" << endl;
+	}
+	else {
+		cout << "NOT assigned" << endl;
+	}
 	for (unsigned int i = 0; i < availability.size(); i++) {
 		//cout << preference[i] << " ";
 		availability[i]->print();
 	}
+
+	for (unsigned int i = 0; i < preferenceByDay.size(); i++) {
+		cout << preferenceByDay[i] << ", ";
+	}
+}
+
+void Student::setPreference (int dayRef) {
+	sortablePreference = preferenceByDay[dayRef];
 }
 
 /* Student List */
@@ -99,6 +193,17 @@ void StudentList::printAvailability () {
 		studentList[i].printAvailability();
 		cout << endl;
 	}
+}
+
+void StudentList::setPreference (int dayRef) {
+	for (unsigned int i = 0; i < studentList.size(); i++) {
+		studentList[i].setPreference (dayRef);
+	}
+}
+
+void StudentList::sortByDay (int dayRef) {
+	setPreference (dayRef);
+	sort(studentList.begin(), studentList.end());
 }
 
 /* Assignment */
@@ -168,18 +273,50 @@ void ScheduleGroup::add (Schedule newSchedule) {
 }
 
 void ScheduleGroup::print (int n) {
+	if (scheduleGroup.size() == 0) {
+		//cout << "NO VIABLE SCHEDULES" << endl;
+		return;
+	}
 	unsigned int i = 0;
 	if (n == -2) {
 		float preferenceRank = scheduleGroup[0].preferenceRank;
-		cout << "Top schedules: " << endl;
+		//cout << "Top schedules: " << endl;
+		cout << "Top " << scheduleGroup[0].schedule[0].time->weekDay << " schedules: " << endl;
+
 		cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << endl;
+		int count = 0;
 		while (scheduleGroup[i].preferenceRank == preferenceRank) {
+			count++;
 			cout << "Schedule #" << i+1 << endl;
 			scheduleGroup[i].print();
 			i++;
+			if (count >= 25) {
+				break;
+			}
 		}
+		//cout << endl << endl;
+		//cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << endl;
+		cout << "showing top " << i;
+	}
+	else if (n == -3) {
+		float preferenceRank = scheduleGroup[0].preferenceRank;
+		//cout << "Top schedules: " << endl;
+		cout << "Top " << scheduleGroup[0].schedule[0].time->weekDay << " schedules: " << endl;
+
 		cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << endl;
-		cout << "printed " << i << " top schedules." << endl;
+		int count = 0;
+		while (scheduleGroup[i].preferenceRank == preferenceRank) {
+			count++;
+			cout << "Schedule #" << i+1 << endl;
+			scheduleGroup[i].print();
+			i++;
+			if (count >= 50) {
+				break;
+			}
+		}
+		//cout << endl << endl;
+		//cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << endl;
+		cout << "showing top " << i << " of " << scheduleGroup.size() << " viable results" << endl;
 	}
 	else {
 		if (n == -1) {
@@ -195,8 +332,9 @@ void ScheduleGroup::print (int n) {
 				cout << "Schedule #" << i << endl;
 				scheduleGroup[i].print();
 			}
-			cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << endl;
-			cout << "printed top " << i << " schedules." << endl;
+			cout << endl << endl;
+			//cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << endl;
+			//cout << "printed top " << i << " schedules." << endl;
 		}
 		else {
 			cout << "No viable schedules :[" << endl;
@@ -223,3 +361,6 @@ bool checkHourSequence (Assignment& firstAssignment, Assignment& secondAssignmen
 	}
 	return (dayCheck && timeCheck);
 }
+
+
+#endif // _CLASSESCONTENT_

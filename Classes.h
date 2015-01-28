@@ -7,6 +7,33 @@
 #include <vector>
 using namespace std;
 
+/* Weekday */
+class Weekday {
+public:
+	string day;
+	unsigned int count;
+	unsigned int preferenceTotal;
+	unsigned int preferenceCount;
+	float avPreference;
+	bool assigned;
+public:
+	Weekday (string);
+	void print ();
+	void calcPref ();
+};
+
+/* Week */
+class Week {
+public:
+	vector<Weekday> fullWeek;
+public:
+	void add (Weekday);
+	void calcPref ();
+	void sortWeek ();
+	void print ();
+	int nextDay ();
+};
+
 /* Time */
 class Time {
 public:
@@ -34,11 +61,17 @@ public:
 	string name;
 	vector<Time*> availability;
 	vector<float> preference;
+	vector<float> preferenceByDay;
+	float sortablePreference;
 	bool hourLong;
+	bool assigned;
 public:
 	Student (string);
+	Student (string, int);
 	void checkAvailability (TimeList&);
 	void printAvailability ();
+	void print ();
+	void setPreference (int);
 };
 
 /* StudentList */
@@ -49,6 +82,8 @@ public:
 	void add (Student);
 	void checkAvailability (TimeList&);
 	void printAvailability ();
+	void setPreference (int);
+	void sortByDay (int);
 };
 
 /* Assignment */

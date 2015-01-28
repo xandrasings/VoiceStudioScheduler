@@ -1,6 +1,6 @@
 // Xandra Best
-// 1/23/15
-// Scheduler Application
+// 1/27/15
+// Process of work
 
 #include <vector>
 #include <string>
@@ -8,12 +8,13 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-#include "classes.h"
-#include "classes.cpp"
+#include "Classes.h"
+#include "Classes.cpp"
 using namespace std;
 
 #define NOBODY -1
 
+// function for calculating number of permutations
 int factorial(int times, int empty) {
 	int result;
     if (times == empty)
@@ -22,38 +23,31 @@ int factorial(int times, int empty) {
         return times * factorial(times-1, empty);
 }
 
-int main(int argc, const char* argv[]) {
-	/* Initializing Variables */
-	// Arguments
-	int threadct = 1; // Number of threads (default = 1)
-	ifstream availabilityFile("StudentAvailability8.csv"); // input file
 
+int process(TimeList catalog, StudentList roster, int threadct) {
 	// Initialize important custom objects
-	TimeList catalog; // Holds available lesson times
-	StudentList roster; // Holds students to be scheduled
 	ScheduleGroup allPossible; // Holds all viable schedules
 	Student nobody("Nobody"); // blank student "Nobody"
 
 	// Set starting
-	unsigned int numStudents; // Number of students to be scheduled
-	unsigned int numTimeSlots; // Number of available lesson times
+	unsigned int numStudents = roster.studentList.size(); // Number of students to be scheduled
+	unsigned int numTimeSlots = catalog.timeList.size(); // Number of available lesson times
 	unsigned int hourLongCount = 0; // Number of students requiring hour-long lessons
-	unsigned long long numPermutations; // Number of schedule permutations
+	for (unsigned int i = 0; i < numStudents; i++) {
+		if (roster.studentList[i].hourLong) {
+			hourLongCount++;
+		}
+	}
+	unsigned long long 	numPermutations = factorial(numTimeSlots-hourLongCount, numTimeSlots-numStudents-hourLongCount);
+; // Number of schedule permutations
 	vector<int> scheduleVec; // vector for handling schedule permutations
 	unsigned int scheduleVecSize; // size of scheduleVec
-
-	// variables for reading in from file
-	unsigned int studRef, timeRef; // ints for referencing students and times
-	string weekDaysS, timesS, studentLineS; //strings for holding a line of file input
-	stringstream weekDaysSS, timesSS, studentLineSS; //stringstreams for holding a line of file input
-	string junk, weekDayCheck, timeCheck, hourLongCheck; //strings for holding raw tokens of input
-	string weekDay, name, availability;	//strings for holding modified tokens of input
-	int hour, minute, delimiter, preference; //ints for holding modified tokens of input
 
 	// iterators
 	unsigned long long k; // for logic loop
 	unsigned int i, h; // for vector sizes
 	int j;
+
 
 	// local variables for logic loop
 	vector<int> localScheduleVec;
@@ -65,69 +59,6 @@ int main(int argc, const char* argv[]) {
 	Assignment localAssignment1;
 	Assignment localAssignment2;
 	bool hourAssignment;
-
-
-	/* Parse command-line args */
-	if (argc > 1) {
-		threadct = atoi(argv[1]);
-	}
-
-
-	/* Read in all info from file */
-	// Read in time slots
-	availabilityFile >> weekDaysS;
-	weekDaysSS << weekDaysS << ",";
-	getline(weekDaysSS, junk, ',');
-	getline(weekDaysSS, junk, ',');
-
-	availabilityFile >> timesS;
-	timesSS << timesS << ",";
-	getline(timesSS, junk, ',');
-	getline(timesSS, junk, ',');
-
-	while(getline(weekDaysSS, weekDayCheck, ',')) {
-		if (weekDayCheck != "") {
-			weekDay = weekDayCheck;
-		}
-		getline(timesSS, timeCheck, ',');
-		delimiter = timeCheck.find(":");
-		hour = stoi(timeCheck.substr(0,delimiter));
-		minute = stoi(timeCheck.substr(delimiter+1,delimiter+3));
-		catalog.add(Time(weekDay,hour,minute));
-	}
-
-	// Read in students
-	studRef = 0;
-	while (availabilityFile >> studentLineS) {
-		timeRef = 0;
-		studentLineSS << studentLineS << ",";
-		getline(studentLineSS, hourLongCheck, ',');
-		getline(studentLineSS, name, ',');
-		roster.add(Student(name));
-		if (hourLongCheck == "*") {
-			roster.studentList[studRef].hourLong = true;
-			hourLongCount++;
-		}
-		else {
-			roster.studentList[studRef].hourLong = false;
-		}
-		while(getline(studentLineSS, availability, ',')) {
-	    	if (availability != "0") {
-		    	roster.studentList[studRef].availability.push_back(& catalog.timeList[timeRef]);
-		    	preference = atoi(availability.c_str());
-		    	roster.studentList[studRef].preference.push_back(preference);
-		    }
-	    	timeRef++;
-		}	
-		studentLineSS.clear();
-		studRef++;
-	}
-
-	/* Prep for logic loop */
-	// set variables necessary for logic
-	numStudents = roster.studentList.size();
-	numTimeSlots = catalog.timeList.size();
-	numPermutations = factorial(numTimeSlots-hourLongCount, numTimeSlots-numStudents-hourLongCount);
 
 	// Prep scheduleVec
 	// Index for each student
@@ -141,19 +72,9 @@ int main(int argc, const char* argv[]) {
 	sort(scheduleVec.begin(), scheduleVec.end());
 	scheduleVecSize = scheduleVec.size();
 
-	/* Logic Loop */
-	// First run of loop, guaranteeing correct first permutation
-	localScheduleVec = scheduleVec;
-	/*
-	cout << "[ ";
-	for (h = 0; h < scheduleVecSize; h++) {
-		cout << localScheduleVec[h];
-		if (h != scheduleVecSize-1) {
-			cout << ", ";
-		}
-	}
-	cout << " ]" << endl;
-	*/
+
+	/* LOGIC LOOP */
+	// First Time Loop 
 
 	// Empty local schedule for new loop
 	localSchedule.clear();
@@ -240,7 +161,9 @@ int main(int argc, const char* argv[]) {
 			next_permutation(scheduleVec.begin(),scheduleVec.end());
 
 			localScheduleVec = scheduleVec;
+
 			/*
+			cout << ((float)k)/((float)numPermutations)*100 << "% - ";
 			cout << "[ ";
 			for (h = 0; h < scheduleVecSize; h++) {
 				cout << localScheduleVec[h];
@@ -250,6 +173,7 @@ int main(int argc, const char* argv[]) {
 			}
 			cout << " ]" << endl;	
 			*/
+
 		}
 
 		// Reset local variables for current SCHEDULE loop
@@ -316,7 +240,7 @@ int main(int argc, const char* argv[]) {
 		
 		}
 		
-		// If all ASSIGNMETNTS in the SCHEDULE were viable, calculate rank and add SCHEDULE 
+		// If all ASSIGNMENTS in the SCHEDULE were viable, calculate rank and add SCHEDULE 
 		if (viable) {
 			preferenceRank = preferenceRank / (float) numStudents;
 			localSchedule.preferenceRank = preferenceRank;
@@ -326,11 +250,10 @@ int main(int argc, const char* argv[]) {
 			}
 		}
 	}
-	cout << endl;
-
 	sort(allPossible.scheduleGroup.begin(),allPossible.scheduleGroup.end());
-
-	// Display viable schedules
 	allPossible.print(-2);
-	return 0;
+
+	//cin >> junk;
+
+	return allPossible.scheduleGroup.size();
 }
