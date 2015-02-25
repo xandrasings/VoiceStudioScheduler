@@ -154,7 +154,6 @@ int process(TimeList catalog, StudentList roster, int threadct) {
 	#pragma omp parallel for num_threads(threadct) \
 		private(k, j, i, h, localSchedule, preferenceRank, hourAssignment, localAssignment1, localAssignment2, viable, localScheduleVec)
 	for (k = 1; k < numPermutations; k++) {
-
 		// CRITICAL Move to next permutation and set localScheduleVec to match.
 		#pragma omp critical
 		{

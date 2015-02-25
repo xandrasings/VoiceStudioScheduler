@@ -1,0 +1,7 @@
+The purpose of this code is to generate viable lesson schedules for music studios given student preference, availability, and lesson lengths. This is done using openmp parallel computing and strategic scheduling assumptions.
+Classes.h and Classes.cpp handle the object oriented structure of this code. ScheduleAlgorithm.cpp takes a TimeList and a StudentList and creates and lists all viable schedules. FullScheduler.cpp runs ScheduleAlgorithm.cpp on the entire TimeList and StudentList while SplitScheduler.cpp runs ScheduleAlgorithm.cpp on several subsets of the entire TimeList and StudentList. This reduces the time and resources necessary for computation.
+This program can be run on any of the StudentAvailability*.csv files, which were created from google docs downloaded as csvs. StudentAvailability6.csv holds the current version of our real-life data, which was retrieved from the google doc at https://docs.google.com/spreadsheets/d/1VieIh053co2IcM9M9QVMyeFaGPg6GabanXv138lhDcU/edit?usp=sharing .
+The time performance of different versions of this are compared at https://docs.google.com/spreadsheets/d/16Q1eyclRBpybFfj3VIAFe78g9EtFC479HCAXq31IDZs/edit?usp=sharing .
+
+to Run this program on StudentAvailability6.csv on 2 threads, enter
+./SplitScheduler StudentAvailability6.csv 2
